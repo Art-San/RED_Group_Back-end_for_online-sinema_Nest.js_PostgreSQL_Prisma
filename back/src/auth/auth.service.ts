@@ -1,6 +1,7 @@
 import {
 	BadRequestException,
 	Injectable,
+	NotFoundException,
 	UnauthorizedException,
 } from '@nestjs/common'
 import { DbService } from 'src/db/db.service'
@@ -8,6 +9,7 @@ import { AuthDto } from './dto/auth.dto'
 import { hash, verify } from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { User } from '@prisma/client'
+import { RefreshTokenDto } from './dto/refreshToken.dto'
 
 @Injectable()
 export class AuthService {
@@ -45,6 +47,36 @@ export class AuthService {
 		const tokens = await this.issueTokenPair(String(newUser.id))
 		return {
 			user: this.returnUserFields(newUser),
+			...tokens,
+		}
+	}
+
+	async getNewTokens({ refreshToken }: RefreshTokenDto) {
+		if (!refreshToken) {
+			throw new UnauthorizedException('Пожалуйста войдите в систему')
+		}
+
+		const result = await this.jwtService.verifyAsync(refreshToken) // Верификация токена
+
+		if (!result) {
+			throw new UnauthorizedException(
+				'Неверный токен или срок его действия истек'
+			)
+		}
+		const user = await this.db.user.findUnique({
+			where: { id: +result.id },
+		})
+
+		if (!user) {
+			// Обработка случая, когда пользователь не найден
+
+			throw new NotFoundException('Пользователь не найден')
+		}
+
+		const tokens = await this.issueTokenPair(String(user.id)) // Создаем токен
+
+		return {
+			user: this.returnUserFields(user),
 			...tokens,
 		}
 	}
