@@ -1,8 +1,19 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { DbService } from 'src/db/db.service'
 
 @Injectable()
 export class UserService {
-	byId(id) {}
+	constructor(private db: DbService) {}
+
+	async byId(id: string) {
+		const user = await this.db.user.findUnique({
+			where: { id: +id },
+		})
+		if (!user) {
+			throw new NotFoundException('Юзер не найден')
+		}
+		return user
+	}
 
 	updateProfile(id, dto) {}
 

@@ -8,7 +8,7 @@
 // 	(data: string, ctx: ExecutionContext) => {
 // 		const request = ctx.switchToHttp().getRequest()
 // 		const user = request.user
-// 		// console.log('data', data) // _id
+// 		// console.log('data', data) // id
 
 // 		return data ? user[data] : user
 // 	}
@@ -19,10 +19,14 @@ import { User } from '@prisma/client' // Импорт модели данных 
 
 type UserDataKey = keyof User // Определение типов данных пользователя в Prisma
 
+// Получаем текущего юзера (авторизованного)
+// https://docs.nestjs.com/custom-decorators
 export const UserDecorator = createParamDecorator(
 	(data: UserDataKey, ctx: ExecutionContext) => {
 		const request = ctx.switchToHttp().getRequest()
 		const user = request.user
+		console.log('user', user)
+		console.log('request', request) // id
 
 		return data ? user[data] : user
 	}

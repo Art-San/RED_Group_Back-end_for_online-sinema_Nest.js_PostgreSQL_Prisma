@@ -11,24 +11,26 @@ import {
 	ValidationPipe,
 } from '@nestjs/common'
 
-// import { Auth } from 'src/auth/decorators/auth.decorator'
+import { Auth } from 'src/auth/decorators/auth.decorator'
 
 import { UserDecorator } from './decorators/user.decorator'
 
 import { UpdateUserDto } from './dto/update-user.dto'
-// import { UserModel } from './user.model'
+
 import { User } from '@prisma/client'
 import { UserService } from './user.service'
+import { ApiOkResponse } from '@nestjs/swagger'
 
 @Controller('users')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Get('profile')
-	// @Auth('admin')
+	@ApiOkResponse({ description: 'Получили профиль' })
 	// @Auth() // Самописный декоратор user || admin Должен быть авторизован
 	async getProfile(@UserDecorator('id') id: string) {
-		return this.userService.byId(id)
+		console.log('id', id)
+		// return this.userService.byId(id)
 	}
 
 	@UsePipes(new ValidationPipe())
