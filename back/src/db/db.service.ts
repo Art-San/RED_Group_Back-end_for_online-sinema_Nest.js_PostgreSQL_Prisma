@@ -8,3 +8,20 @@ export class DbService extends PrismaClient implements OnModuleInit {
 		await this.$connect()
 	}
 }
+
+// import { PrismaClient } from '@prisma/client'
+// import { Injectable, OnModuleInit } from '@nestjs/common'
+// import { ConfigService } from '@nestjs/config'
+
+// @Injectable()
+// export class DbService extends PrismaClient implements OnModuleInit {
+// 	constructor(private readonly configService: ConfigService) {
+// 		super({
+// 			log: configService.get('NODE_ENV') === 'development' ? ['query'] : [],
+// 		})
+// 	}
+
+// 	async onModuleInit() {
+// 		await this.$connect()
+// 	}
+// }

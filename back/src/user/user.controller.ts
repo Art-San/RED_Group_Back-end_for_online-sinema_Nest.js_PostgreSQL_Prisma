@@ -20,6 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto'
 import { User } from '@prisma/client'
 import { UserService } from './user.service'
 import { ApiOkResponse } from '@nestjs/swagger'
+import { ProfileDto } from './dto/profile.dto'
 
 @Controller('users')
 export class UserController {
@@ -32,10 +33,12 @@ export class UserController {
 		return this.userService.byId(id)
 	}
 
-	@UsePipes(new ValidationPipe())
-	@Put('profile') // обновление юзера
-	@HttpCode(200) //Ставим 200 везде где Put или Post
-	// @Auth()
+	@Put('profile')
+	@ApiOkResponse({
+		type: ProfileDto,
+	})
+	@HttpCode(200)
+	@Auth()
 	async updateProfile(
 		@UserDecorator('id') id: string,
 		@Body() dto: UpdateUserDto

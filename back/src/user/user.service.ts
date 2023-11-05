@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { DbService } from 'src/db/db.service'
+import { UpdateUserDto } from './dto/update-user.dto'
+import { hash, verify } from 'argon2'
 
 @Injectable()
 export class UserService {
@@ -15,7 +17,29 @@ export class UserService {
 		return user
 	}
 
-	updateProfile(id, dto) {}
+	async updateProfile(id: string, dto: UpdateUserDto) {
+		const user = await this.byId(id)
+
+		const isSameUser = await this.db.user.findUnique({
+			where: { email: dto.email },
+		})
+
+		if (isSameUser && String(id) !== String(isSameUser.id)) {
+			throw new NotFoundException('Email занят')
+		}
+
+		if (dto.password) {
+			user.password = await hash(dto.password)
+		}
+
+		user.email = dto.email
+
+		if (dto.isAdmin || dto.isAdmin === false) {
+			user.isAdmin = dto.isAdmin
+		}
+
+		return user
+	}
 
 	getFavoriteMovies(id) {}
 
