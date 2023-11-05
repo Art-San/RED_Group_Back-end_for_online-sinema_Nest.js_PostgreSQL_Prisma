@@ -27,10 +27,9 @@ export class UserController {
 
 	@Get('profile')
 	@ApiOkResponse({ description: 'Получили профиль' })
-	// @Auth() // Самописный декоратор user || admin Должен быть авторизован
+	@Auth() // Самописный декоратор user || admin Должен быть авторизован
 	async getProfile(@UserDecorator('id') id: string) {
-		console.log('id', id)
-		// return this.userService.byId(id)
+		return this.userService.byId(id)
 	}
 
 	@UsePipes(new ValidationPipe())

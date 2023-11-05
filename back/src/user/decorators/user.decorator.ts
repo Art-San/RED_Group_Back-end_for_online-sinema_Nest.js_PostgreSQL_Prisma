@@ -25,8 +25,9 @@ export const UserDecorator = createParamDecorator(
 	(data: UserDataKey, ctx: ExecutionContext) => {
 		const request = ctx.switchToHttp().getRequest()
 		const user = request.user
-		console.log('user', user)
-		console.log('request', request) // id
+		// console.log('data', data) // id
+		// console.log('UserDecorator', request) // Информация о входящем HTTP-запросе и связанном с ним HTTP-ответе
+		// Длинная простыня, а главное в конце появляется USER благодаря auth.decorator.ts и JwtStrategy
 
 		return data ? user[data] : user
 	}
