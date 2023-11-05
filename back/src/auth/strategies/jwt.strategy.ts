@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 	}
 }
 
-//============= Этот код от туда где mongoDB
+//============= Этот код от туда где mongoDB =======
 // import { Injectable } from '@nestjs/common'
 // import { ConfigService } from '@nestjs/config'
 // import { PassportStrategy } from '@nestjs/passport'
