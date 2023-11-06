@@ -47,7 +47,32 @@ export class UserService {
 
 	getCount() {}
 
-	getAll(searchTerm) {}
+	async getAll(searchTerm?: string) {
+		// const users = await this.db.user.findMany({
+		// 	where: {
+		// 		OR: [
+		// 			{
+		// 				email: {
+		// 					contains: searchTerm,
+		// 					mode: 'insensitive',
+		// 				},
+		// 			},
+		// 		],
+		// 	},
+		// 	select: {
+		// 		id: true,
+		// 		email: true,
+		// 		isAdmin: true,
+		// 		createdAt: true,
+		// 	},
+		// 	orderBy: {
+		// 		createdAt: 'desc',
+		// 	},
+		// })
+
+		const users = await this.db.user.findMany()
+		return users
+	}
 
 	delete(id) {}
 }

@@ -71,7 +71,7 @@ export class UserController {
 
 	// ПОЛУЧЕНИЕ ВСЕХ и ПОИСК по email и сортировка по дате АДМИНОМ
 	@Get() // ?searchTerm = 'rety' квери параметр
-	// @Auth('admin')
+	@Auth('admin')
 	async getUsers(@Query('searchTerm') searchTerm?: string) {
 		return this.userService.getAll(searchTerm)
 	}
