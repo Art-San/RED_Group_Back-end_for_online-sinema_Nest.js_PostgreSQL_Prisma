@@ -38,7 +38,17 @@ export class UserService {
 			user.isAdmin = dto.isAdmin
 		}
 
-		return user
+		// Сохраните изменения в базе данных
+		const updatedUser = await this.db.user.update({
+			where: { id: user.id },
+			data: {
+				email: user.email,
+				password: user.password,
+				isAdmin: user.isAdmin,
+			},
+		})
+
+		return updatedUser
 	}
 
 	getFavoriteMovies(id) {}
