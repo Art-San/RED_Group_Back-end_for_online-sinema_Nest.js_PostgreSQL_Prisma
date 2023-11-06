@@ -64,7 +64,7 @@ export class UserController {
 	}
 
 	@Get('count')
-	// @Auth('admin')
+	@Auth('admin')
 	async getCountUsers() {
 		return this.userService.getCount()
 	}
@@ -83,7 +83,6 @@ export class UserController {
 		return this.userService.byId(id)
 	}
 	// ОБНОВЛЕНИЕ записи юзера АДМИНОМ
-	@UsePipes(new ValidationPipe())
 	@Put(':id') // :id query param вытаскивается через декоратор @Param
 	@HttpCode(200)
 	// @Auth('admin') // Должен быть имено admin
@@ -95,13 +94,14 @@ export class UserController {
 		return this.userService.updateProfile(id, dto)
 	}
 	// УДАЛЕНИЕ записи юзера АДМИНОМ
-	@Delete(':id') // :id query param вытаскивается через декоратор @Param
+	@Delete(':id')
+	@ApiOkResponse({
+		type: ProfileDto,
+		description: 'Пользователь успешно удален',
+	})
 	@HttpCode(200)
-	// @Auth('admin')
-	async deleteUser(
-		// Админ меняет данные
-		@Param('id') id: string
-	) {
+	@Auth('admin')
+	async deleteUser(@Param('id') id: string) {
 		return this.userService.delete(id)
 	}
 }

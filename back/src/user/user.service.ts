@@ -55,34 +55,47 @@ export class UserService {
 
 	toggleFavorite(movieId, user) {}
 
-	getCount() {}
+	async getCount() {
+		return this.db.user.count()
+	}
 
 	async getAll(searchTerm?: string) {
-		// const users = await this.db.user.findMany({
-		// 	where: {
-		// 		OR: [
-		// 			{
-		// 				email: {
-		// 					contains: searchTerm,
-		// 					mode: 'insensitive',
-		// 				},
-		// 			},
-		// 		],
-		// 	},
-		// 	select: {
-		// 		id: true,
-		// 		email: true,
-		// 		isAdmin: true,
-		// 		createdAt: true,
-		// 	},
-		// 	orderBy: {
-		// 		createdAt: 'desc',
-		// 	},
-		// })
+		const users = await this.db.user.findMany({
+			where: {
+				OR: [
+					{
+						email: {
+							contains: searchTerm ? searchTerm : '',
+							mode: 'insensitive',
+						},
+					},
+				],
+			},
+			select: {
+				id: true,
+				email: true,
+				isAdmin: true,
+				createdAt: true,
+			},
+			orderBy: {
+				createdAt: 'desc',
+			},
+		})
 
-		const users = await this.db.user.findMany()
 		return users
 	}
 
-	delete(id) {}
+	async delete(id: string) {
+		try {
+			const user = await this.db.user.delete({
+				where: { id: +id },
+			})
+			if (!user) {
+				throw new Error('Пользователь не найден')
+			}
+			return user
+		} catch (error) {
+			throw new Error('Произошла ошибка при удалении пользователя')
+		}
+	}
 }
