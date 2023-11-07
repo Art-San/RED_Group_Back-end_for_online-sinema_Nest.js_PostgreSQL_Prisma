@@ -82,7 +82,12 @@ export class UserService {
 			},
 		})
 
-		return users
+		return users.map((user) => ({
+			id: user.id,
+			email: user.email,
+			isAdmin: user.isAdmin,
+			createdAt: user.createdAt.toISOString(), // При необходимости преобразуйте дату в строку
+		}))
 	}
 
 	async delete(id: string) {

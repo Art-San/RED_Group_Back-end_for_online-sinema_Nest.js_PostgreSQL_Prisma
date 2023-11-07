@@ -24,6 +24,8 @@ import {
 	ApiTags,
 } from '@nestjs/swagger'
 import { ProfileDto } from './dto/profile.dto'
+import { ListUsersDto } from './dto/list-users.dto'
+import { IsOptional } from 'class-validator'
 
 @ApiBearerAuth() // Этот декоратор указывает, что эндпоинт требует аутентификации
 @ApiTags('Users') // Можете добавить теги для группировки эндпоинтов в Swagger UI
@@ -32,7 +34,10 @@ export class UserController {
 	constructor(private readonly userService: UserService) {}
 
 	@Get('profile')
-	@ApiOkResponse({ description: 'Получили профиль' })
+	@ApiOkResponse({
+		type: ProfileDto,
+		description: 'Получили профиль',
+	})
 	@Auth() // Самописный декоратор user || admin Должен быть авторизован
 	async getProfile(@UserDecorator('id') id: string) {
 		return this.userService.byId(id)
@@ -81,18 +86,34 @@ export class UserController {
 	// Get all и ПОИСК по email и сортировка по дате
 	@Get()
 	@Auth('admin')
-	async getUsers(@Query('searchTerm') searchTerm?: string) {
+	@ApiOkResponse({
+		type: ListUsersDto, // Здесь указывается тип данных, который возвращается вашим методом (например, User)
+		description: 'Список пользователей', // Описание ответа
+	})
+	async getUsers(
+		@Query('searchTerm')
+		searchTerm?: string
+	): Promise<ListUsersDto[]> {
 		return this.userService.getAll(searchTerm)
 	}
 
 	// Get user :id
 	@Get(':id')
+	@ApiOkResponse({
+		type: ProfileDto,
+		description: 'Получили профиль',
+	})
 	@Auth('admin')
 	async getUser(@Param('id') id: string) {
 		return this.userService.byId(id)
 	}
+
 	// Обновление юзера
 	@Put(':id')
+	@ApiOkResponse({
+		type: ProfileDto,
+		description: 'Обновлен профиль Юзера',
+	})
 	@HttpCode(200)
 	@Auth('admin')
 	async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
@@ -105,7 +126,6 @@ export class UserController {
 		type: ProfileDto,
 		description: 'Пользователь успешно удален',
 	})
-	@HttpCode(200)
 	@Auth('admin')
 	async deleteUser(@Param('id') id: string) {
 		return this.userService.delete(id)

@@ -11,23 +11,14 @@ datasource db {
 }
 
 
-model Actor {
+model User {
   id       Int      @id @default(autoincrement())
-  name     String
-  slug     String   @unique
-  photo    String
+  email    String   @unique
+  password String
+  isAdmin  Boolean @default(false)
+  favorites MovieUser[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-model Genre {
-  id          Int      @id @default(autoincrement())
-  name        String
-  slug        String   @unique
-  description String
-  icon        String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }
 
 model Movie {
@@ -45,45 +36,14 @@ model Movie {
   isSendTelegram Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+  movieUsers  MovieUser[]  // Обратное поле связи
 }
 
-model Rating {
-  id       Int      @id @default(autoincrement())
-  userId   Int
-  movieId  Int
-  value    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-}
-
-model User {
-  id       Int      @id @default(autoincrement())
-  email    String   @unique
-  password String
-  isAdmin  Boolean @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model UserToFavorites {
-  id       Int @id @default(autoincrement())
-  userId   Int
-  movieId  Int
-  createdAt DateTime @default(now())
-}
-
-model MovieToGenre {
-  id       Int @id @default(autoincrement())
+model MovieUser {
+  id     Int      @id @default(autoincrement())
+  user   User     @relation(fields: [userId], references: [id])
+  userId Int
+  movie  Movie    @relation(fields: [movieId], references: [id])
   movieId Int
-  genreId Int
-
 }
 
-model MovieToActor {
-  id       Int @id @default(autoincrement())
-  movieId Int
-  actorId Int
-
-}
