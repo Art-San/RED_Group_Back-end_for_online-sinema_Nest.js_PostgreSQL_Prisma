@@ -13,6 +13,7 @@ async function bootstrap() {
 	SwaggerModule.setup('api', app, document) // 1. Роут 2.Приложение 3. Документ который нужно хостит
 
 	app.useGlobalPipes(new ValidationPipe()) // глобальный ValidationPipe не надо в контроллерах так писать @UsePipes(new ValidationPipe())
+	// app.setGlobalPrefix('api')
 	await app.listen(3000)
 }
 bootstrap()

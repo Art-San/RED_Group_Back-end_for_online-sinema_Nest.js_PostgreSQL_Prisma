@@ -7,8 +7,6 @@ import {
 	Param,
 	Put,
 	Query,
-	UsePipes,
-	ValidationPipe,
 } from '@nestjs/common'
 
 import { Auth } from 'src/auth/decorators/auth.decorator'
@@ -19,9 +17,16 @@ import { UpdateUserDto } from './dto/update-user.dto'
 
 import { User } from '@prisma/client'
 import { UserService } from './user.service'
-import { ApiOkResponse } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiOkResponse,
+	ApiOperation,
+	ApiTags,
+} from '@nestjs/swagger'
 import { ProfileDto } from './dto/profile.dto'
 
+@ApiBearerAuth() // Этот декоратор указывает, что эндпоинт требует аутентификации
+@ApiTags('Users') // Можете добавить теги для группировки эндпоинтов в Swagger UI
 @Controller('users')
 export class UserController {
 	constructor(private readonly userService: UserService) {}
@@ -43,19 +48,18 @@ export class UserController {
 		@UserDecorator('id') id: string,
 		@Body() dto: UpdateUserDto
 	) {
-		// сам юзер обновляет данные
 		return this.userService.updateProfile(id, dto)
 	}
 
-	@Get('profile/favorites')
-	// @Auth()
+	@Get('profile/favorites') /*TODO:- нет реализации в сервисе*/
+	@Auth()
 	async getFavorites(@UserDecorator('id') id: string) {
 		return this.userService.getFavoriteMovies(id)
 	}
 
-	@Put('profile/favorites')
+	@Put('profile/favorites') /*TODO:- нет реализации в сервисе*/
 	@HttpCode(200)
-	// @Auth()
+	@Auth()
 	async toggleFavorite(
 		@Body('movieId') movieId: number,
 		@UserDecorator() user: User
@@ -63,37 +67,39 @@ export class UserController {
 		return this.userService.toggleFavorite(movieId, user)
 	}
 
+	// ================= Только admin ==================
+	// Количество все пользователей
 	@Get('count')
+	@ApiOperation({
+		summary: 'Получить количество пользователей (только администратор)',
+	})
 	@Auth('admin')
 	async getCountUsers() {
 		return this.userService.getCount()
 	}
 
-	// ПОЛУЧЕНИЕ ВСЕХ и ПОИСК по email и сортировка по дате АДМИНОМ
-	@Get() // ?searchTerm = 'rety' квери параметр
+	// Get all и ПОИСК по email и сортировка по дате
+	@Get()
 	@Auth('admin')
 	async getUsers(@Query('searchTerm') searchTerm?: string) {
 		return this.userService.getAll(searchTerm)
 	}
 
-	// ПОЛУЧЕНИЕ профиля конкретного юзера АДМИНОМ
+	// Get user :id
 	@Get(':id')
-	// @Auth('admin')
+	@Auth('admin')
 	async getUser(@Param('id') id: string) {
 		return this.userService.byId(id)
 	}
-	// ОБНОВЛЕНИЕ записи юзера АДМИНОМ
-	@Put(':id') // :id query param вытаскивается через декоратор @Param
+	// Обновление юзера
+	@Put(':id')
 	@HttpCode(200)
-	// @Auth('admin') // Должен быть имено admin
-	async updateUser(
-		// Админ меняет данные
-		@Param('id') id: string,
-		@Body() dto: UpdateUserDto
-	) {
+	@Auth('admin')
+	async updateUser(@Param('id') id: string, @Body() dto: UpdateUserDto) {
 		return this.userService.updateProfile(id, dto)
 	}
-	// УДАЛЕНИЕ записи юзера АДМИНОМ
+
+	// Удаление юзера
 	@Delete(':id')
 	@ApiOkResponse({
 		type: ProfileDto,
