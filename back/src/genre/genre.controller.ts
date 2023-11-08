@@ -1,16 +1,19 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	Get,
 	HttpCode,
 	Param,
 	ParseIntPipe,
 	Post,
 	Put,
+	Query,
 } from '@nestjs/common'
 import {
 	ApiBearerAuth,
 	ApiCreatedResponse,
+	ApiOkResponse,
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger'
@@ -26,8 +29,22 @@ export class GenreController {
 	constructor(private readonly genreService: GenreService) {}
 
 	@Get('by-slug/:slug')
+	@ApiResponse({
+		type: GenreDto,
+	})
 	async bySlug(@Param('slug') slug: string) {
 		return this.genreService.bySlug(slug)
+	}
+
+	/*TODO: не реализован*/
+	@Get('collections')
+	async getCollections() {
+		return this.genreService.getCollections()
+	}
+
+	@Get()
+	async getAll(@Query('searchTerm') searchTerm?: string) {
+		return this.genreService.getAll(searchTerm)
 	}
 
 	/*Admin place*/
@@ -62,5 +79,16 @@ export class GenreController {
 		@Body() dto: CreateGenreDto
 	) {
 		return this.genreService.update(id, dto)
+	}
+
+	@Delete(':id')
+	@ApiOkResponse({
+		type: GenreDto,
+		description: 'Жанр успешно удален',
+	})
+	@HttpCode(200)
+	@Auth('admin')
+	async deleteUser(@Param('id', ParseIntPipe) id: number) {
+		return this.genreService.delete(id)
 	}
 }

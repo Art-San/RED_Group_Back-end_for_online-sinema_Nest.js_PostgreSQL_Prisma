@@ -6,6 +6,7 @@ import {
 	NotFoundException,
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
+
 import { DbService } from 'src/db/db.service'
 import { CreateGenreDto } from './dto/create-genre.dto'
 
@@ -13,13 +14,70 @@ import { CreateGenreDto } from './dto/create-genre.dto'
 export class GenreService {
 	constructor(private db: DbService) {}
 
-	// async bySlug(slug: string) {
-	// 	const doc = await this.genreModel.findOne({ slug }).exec() // DOC - универсальное обозначение
-	// 	if (!doc) {
-	// 		throw new NotFoundException('По слагу Genre не найден')
-	// 	}
-	// 	return doc
-	// }
+	async bySlug(slug: string) {
+		try {
+			const genre = await this.db.genre.findUnique({
+				where: {
+					slug,
+				},
+			})
+			if (!genre) {
+				throw new NotFoundException('По слагу Genre не найден')
+			}
+			return genre
+		} catch (error) {
+			throw new InternalServerErrorException(error.message)
+		}
+	}
+
+	async getAll(searchTerm?: string) {
+		const genres = await this.db.genre.findMany({
+			where: {
+				OR: [
+					{
+						name: {
+							contains: searchTerm ? searchTerm : '',
+							mode: 'insensitive',
+						},
+					},
+					{
+						slug: {
+							contains: searchTerm ? searchTerm : '',
+							mode: 'insensitive',
+						},
+					},
+					{
+						description: {
+							contains: searchTerm ? searchTerm : '',
+							mode: 'insensitive',
+						},
+					},
+				],
+			},
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				description: true,
+				icon: true,
+				createdAt: true,
+			},
+			orderBy: { createdAt: 'desc' },
+		})
+
+		return genres.map((genre) => ({
+			id: genre.id,
+			name: genre.name,
+			slug: genre.slug,
+			description: genre.description,
+			icon: genre.icon,
+			createdAt: genre.createdAt.toISOString(),
+		}))
+	}
+
+	async getCollections() {
+		throw new NotFoundException('метод еще не реализован')
+	}
 
 	/*Admin place*/
 
@@ -81,6 +139,30 @@ export class GenreService {
 
 			throw new InternalServerErrorException(
 				'Произошла непонятная ошибка в базе данных',
+				error
+			)
+		}
+	}
+
+	async delete(id: number) {
+		try {
+			const genre = await this.db.genre.delete({
+				where: { id: id },
+			})
+			if (!genre) {
+				throw new NotFoundException('Жанр не найден')
+			}
+			return genre
+		} catch (error) {
+			// console.log(error)
+
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				if (error.code === 'P2025') {
+					throw new NotFoundException('не найден жанр с таким id')
+				}
+			}
+			throw new InternalServerErrorException(
+				'Произошла ошибка при удалении жанра',
 				error
 			)
 		}
