@@ -25,6 +25,12 @@ import { GenreService } from './genre.service'
 export class GenreController {
 	constructor(private readonly genreService: GenreService) {}
 
+	@Get('by-slug/:slug')
+	async bySlug(@Param('slug') slug: string) {
+		return this.genreService.bySlug(slug)
+	}
+
+	/*Admin place*/
 	@ApiBearerAuth()
 	@Get(':id')
 	@ApiResponse({
@@ -44,6 +50,7 @@ export class GenreController {
 		return this.genreService.create()
 	}
 
+	@ApiBearerAuth()
 	@Put(':id')
 	@HttpCode(200)
 	@ApiResponse({

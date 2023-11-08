@@ -2,14 +2,24 @@ import {
 	HttpException,
 	HttpStatus,
 	Injectable,
+	InternalServerErrorException,
 	NotFoundException,
 } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
 import { DbService } from 'src/db/db.service'
 import { CreateGenreDto } from './dto/create-genre.dto'
 
 @Injectable()
 export class GenreService {
 	constructor(private db: DbService) {}
+
+	// async bySlug(slug: string) {
+	// 	const doc = await this.genreModel.findOne({ slug }).exec() // DOC - универсальное обозначение
+	// 	if (!doc) {
+	// 		throw new NotFoundException('По слагу Genre не найден')
+	// 	}
+	// 	return doc
+	// }
 
 	/*Admin place*/
 
@@ -49,14 +59,30 @@ export class GenreService {
 		const existingGenre = await this.db.genre.findUnique({ where: { id } })
 
 		if (!existingGenre) {
-			throw new NotFoundException(`Genre with id ${id} not found`)
+			throw new NotFoundException(`Жанр с идентификатором ${id} не найден.`)
 		}
+		try {
+			const updatedGenre = await this.db.genre.update({
+				where: { id },
+				data: dto,
+			})
 
-		const updatedGenre = await this.db.genre.update({
-			where: { id },
-			data: dto,
-		})
+			return updatedGenre
+		} catch (error) {
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				if (error.code === 'P2002') {
+					throw new NotFoundException('Значение slug уже занят')
+				}
+			}
+			// P2002: Ошибка уникального ограничения (Unique constraint violation).
+			// P2003: Ошибка ограничения внешнего ключа (Foreign key constraint violation).
+			// P2025: Нарушение ограничения уникальности (Unique constraint violation).
+			// P2000: Общая ошибка базы данных.
 
-		return updatedGenre
+			throw new InternalServerErrorException(
+				'Произошла непонятная ошибка в базе данных',
+				error
+			)
+		}
 	}
 }
