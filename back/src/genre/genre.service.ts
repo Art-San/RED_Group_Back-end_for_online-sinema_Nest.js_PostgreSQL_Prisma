@@ -9,26 +9,62 @@ import { Prisma } from '@prisma/client'
 
 import { DbService } from 'src/db/db.service'
 import { CreateGenreDto } from './dto/create-genre.dto'
+import { GenreDto } from './dto/genre.dto'
 
 @Injectable()
 export class GenreService {
 	constructor(private db: DbService) {}
 
 	async bySlug(slug: string) {
-		try {
-			const genre = await this.db.genre.findUnique({
-				where: {
-					slug,
-				},
-			})
-			if (!genre) {
-				throw new NotFoundException('По слагу Genre не найден')
-			}
-			return genre
-		} catch (error) {
-			throw new InternalServerErrorException(error.message)
+		const genre = await this.db.genre.findUnique({
+			where: {
+				slug,
+			},
+		})
+
+		if (!genre) {
+			throw new NotFoundException('Genre not found by slug: ' + slug)
 		}
+
+		return genre
 	}
+
+	//========================= Вариант от GPT =========================
+	// async getAll(searchTerm?: string) {
+	// 	const searchCondition = this.buildSearchCondition(searchTerm)
+
+	// 	const genres = await this.db.genre.findMany({
+	// 		where: searchCondition,
+	// 		select: {
+	// 			id: true,
+	// 			name: true,
+	// 			slug: true,
+	// 			description: true,
+	// 			icon: true,
+	// 			createdAt: true,
+	// 		},
+	// 		orderBy: { createdAt: 'desc' },
+	// 	})
+
+	// 	return genres.map(({ id, name, slug, description, icon, createdAt }) => ({
+	// 		id,
+	// 		name,
+	// 		slug,
+	// 		description,
+	// 		icon,
+	// 		createdAt: createdAt.toISOString(),
+	// 	}))
+	// }
+
+	// private buildSearchCondition(searchTerm?: string): any {
+	// 	return {
+	// 		OR: [
+	// 			{ name: { contains: searchTerm ?? '', mode: 'insensitive' } },
+	// 			{ slug: { contains: searchTerm ?? '', mode: 'insensitive' } },
+	// 			{ description: { contains: searchTerm ?? '', mode: 'insensitive' } },
+	// 		],
+	// 	}
+	// }
 
 	async getAll(searchTerm?: string) {
 		const genres = await this.db.genre.findMany({
@@ -36,19 +72,19 @@ export class GenreService {
 				OR: [
 					{
 						name: {
-							contains: searchTerm ? searchTerm : '',
+							contains: searchTerm ?? '', // оператор объединения nullish ??
 							mode: 'insensitive',
 						},
 					},
 					{
 						slug: {
-							contains: searchTerm ? searchTerm : '',
+							contains: searchTerm || '',
 							mode: 'insensitive',
 						},
 					},
 					{
 						description: {
-							contains: searchTerm ? searchTerm : '',
+							contains: searchTerm || '',
 							mode: 'insensitive',
 						},
 					},
@@ -64,14 +100,13 @@ export class GenreService {
 			},
 			orderBy: { createdAt: 'desc' },
 		})
-
-		return genres.map((genre) => ({
-			id: genre.id,
-			name: genre.name,
-			slug: genre.slug,
-			description: genre.description,
-			icon: genre.icon,
-			createdAt: genre.createdAt.toISOString(),
+		return genres.map(({ id, name, slug, description, icon, createdAt }) => ({
+			id,
+			name,
+			slug,
+			description,
+			icon,
+			createdAt: createdAt.toISOString(),
 		}))
 	}
 

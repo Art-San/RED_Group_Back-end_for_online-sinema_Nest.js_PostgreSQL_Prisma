@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CreateGenreDto } from './dto/create-genre.dto'
+import { GenreResDto } from './dto/genre-res.dto'
 import { GenreDto } from './dto/genre.dto'
 
 import { GenreService } from './genre.service'
@@ -43,7 +44,12 @@ export class GenreController {
 	}
 
 	@Get()
-	async getAll(@Query('searchTerm') searchTerm?: string) {
+	@ApiResponse({
+		type: GenreResDto,
+	})
+	async getAll(
+		@Query('searchTerm') searchTerm?: string
+	): Promise<GenreResDto[]> {
 		return this.genreService.getAll(searchTerm)
 	}
 
@@ -81,6 +87,7 @@ export class GenreController {
 		return this.genreService.update(id, dto)
 	}
 
+	@ApiBearerAuth()
 	@Delete(':id')
 	@ApiOkResponse({
 		type: GenreDto,
