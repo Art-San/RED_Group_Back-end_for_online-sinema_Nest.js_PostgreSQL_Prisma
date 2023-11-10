@@ -18,7 +18,7 @@ import {
 	ApiTags,
 } from '@nestjs/swagger'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { CreateGenreDto } from './dto/create-genre.dto'
+import { UpdateGenreDto } from './dto/update-genre.dto'
 import { GenreResDto } from './dto/genre-res.dto'
 import { GenreDto } from './dto/genre.dto'
 
@@ -82,7 +82,7 @@ export class GenreController {
 	@Auth('admin')
 	async update(
 		@Param('id', ParseIntPipe) id: number,
-		@Body() dto: CreateGenreDto
+		@Body() dto: UpdateGenreDto
 	) {
 		return this.genreService.update(id, dto)
 	}

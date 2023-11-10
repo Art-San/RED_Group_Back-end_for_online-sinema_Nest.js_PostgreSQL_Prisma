@@ -8,8 +8,7 @@ import {
 import { Prisma } from '@prisma/client'
 
 import { DbService } from 'src/db/db.service'
-import { CreateGenreDto } from './dto/create-genre.dto'
-import { GenreDto } from './dto/genre.dto'
+import { UpdateGenreDto } from './dto/update-genre.dto'
 
 @Injectable()
 export class GenreService {
@@ -148,7 +147,7 @@ export class GenreService {
 		}
 	}
 
-	async update(id: number, dto: CreateGenreDto) {
+	async update(id: number, dto: UpdateGenreDto) {
 		const existingGenre = await this.db.genre.findUnique({ where: { id } })
 
 		if (!existingGenre) {
