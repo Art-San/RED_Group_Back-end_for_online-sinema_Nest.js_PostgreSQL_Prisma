@@ -2,11 +2,13 @@ import {
 	Body,
 	Controller,
 	Delete,
+	Get,
 	HttpCode,
 	Param,
 	ParseIntPipe,
 	Post,
 	Put,
+	Query,
 } from '@nestjs/common'
 import {
 	ApiBearerAuth,
@@ -26,7 +28,30 @@ import { UpdateActorDto } from './dto/update-actor.dto'
 export class ActorController {
 	constructor(private readonly actorService: ActorService) {}
 
+	@Get('by-slug/:slug')
+	@ApiResponse({
+		type: ActorDto,
+	})
+	async bySlug(@Param('slug') slug: string) {
+		return this.actorService.bySlug(slug)
+	}
+
+	@Get()
+	async getAll(@Query('searchTerm') searchTerm?: string) {
+		return this.actorService.getAll(searchTerm)
+	}
+
 	/*Admin place*/
+	@ApiBearerAuth()
+	@Get(':id')
+	@ApiResponse({
+		type: ActorDto,
+	})
+	@Auth('admin')
+	async get(@Param('id', ParseIntPipe) id: number) {
+		return this.actorService.byId(id)
+	}
+
 	@ApiBearerAuth()
 	@Post()
 	@ApiCreatedResponse({
@@ -44,7 +69,6 @@ export class ActorController {
 	@ApiResponse({
 		type: UpdateActorDto,
 	})
-	@HttpCode(200)
 	@Auth('admin')
 	async update(@Param('id', ParseIntPipe) id: number, @Body() dto: ActorDto) {
 		return this.actorService.update(id, dto)

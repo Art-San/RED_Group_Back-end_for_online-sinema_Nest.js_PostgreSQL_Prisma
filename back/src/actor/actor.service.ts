@@ -14,6 +14,46 @@ export class ActorService {
 	private readonly logger = new Logger(ActorService.name)
 	constructor(private db: DbService) {}
 
+	async bySlug(slug: string) {
+		const actor = await this.db.actor.findUnique({
+			where: {
+				slug,
+			},
+		})
+
+		if (!actor) {
+			throw new NotFoundException('По слагу Actor не найден')
+		}
+
+		return actor
+	}
+
+	async getAll(searchTerm?: string) {
+		return null
+	}
+
+	/*Admin place*/
+	async byId(id: number) {
+		try {
+			const actor = await this.db.actor.findFirst({
+				where: {
+					id: id,
+				},
+			})
+
+			if (!actor) {
+				throw new NotFoundException('Актер не найден!!!')
+			}
+
+			return actor
+		} catch (error) {
+			throw new InternalServerErrorException(
+				'Произошла непредвиденная ошибка',
+				error.message
+			)
+		}
+	}
+
 	async create() {
 		try {
 			const defaultValue = {
@@ -42,11 +82,12 @@ export class ActorService {
 	}
 
 	async update(id: number, dto: UpdateActorDto) {
-		const existingActor = await this.db.actor.findFirst({ where: { id } })
-
-		if (!existingActor) {
-			throw new NotFoundException(`Актер с идентификатором ${id} не найден.`)
-		}
+		await this.byId(id)
+		// console.log('existingActor', existingActor)
+		// const existingActor = await this.db.actor.findFirst({ where: { id } })
+		// if (!existingActor) {
+		// 	throw new NotFoundException(`Актер с идентификатором ${id} не найден.`)
+		// }
 		try {
 			const updatedActor = await this.db.actor.update({
 				where: { id },
@@ -63,7 +104,7 @@ export class ActorService {
 			// P2002: Ошибка уникального ограничения (Unique constraint violation).
 			// P2003: Ошибка ограничения внешнего ключа (Foreign key constraint violation).
 			// P2025: Нарушение ограничения уникальности (Unique constraint violation).
-			// P2000: Общая ошибка базы данных.
+			// P2000: Общая ошибка базы данных
 
 			throw new InternalServerErrorException(
 				'Произошла непонятная ошибка в базе данных, при обновление актера ',
@@ -82,6 +123,7 @@ export class ActorService {
 			}
 			return deletedActor
 		} catch (error) {
+			// console.log('error', error.meta.cause)
 			this.logger.error(
 				`Произошла ошибка во время удаления актера с идентификатором ${id}`,
 				error.stack,
@@ -95,7 +137,8 @@ export class ActorService {
 			// 	}
 			// }
 			throw new ConflictException(
-				`Ошибка при удалении актера: ${error.message}`
+				`Ошибка при удалении актера: ${error.meta.cause}`
+				// `Ошибка при удалении актера: ${error.message}`
 			)
 		}
 	}
