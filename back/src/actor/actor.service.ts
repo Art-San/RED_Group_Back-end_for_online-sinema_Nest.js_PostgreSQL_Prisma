@@ -1,8 +1,8 @@
 import {
-	HttpException,
-	HttpStatus,
+	ConflictException,
 	Injectable,
 	InternalServerErrorException,
+	Logger,
 	NotFoundException,
 } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
@@ -11,6 +11,7 @@ import { UpdateActorDto } from './dto/update-actor.dto'
 
 @Injectable()
 export class ActorService {
+	private readonly logger = new Logger(ActorService.name)
 	constructor(private db: DbService) {}
 
 	async create() {
@@ -27,15 +28,21 @@ export class ActorService {
 
 			return actor.id
 		} catch (error) {
-			throw new HttpException(
-				'Ошибка создания жанра',
-				HttpStatus.INTERNAL_SERVER_ERROR
+			if (error instanceof Prisma.PrismaClientKnownRequestError) {
+				if (error.code === 'P2002') {
+					throw new NotFoundException('Значение slug должен быть уникальным')
+				}
+			}
+
+			throw new InternalServerErrorException(
+				'Произошла непонятная ошибка в базе данных, при создании актера',
+				error
 			)
 		}
 	}
 
 	async update(id: number, dto: UpdateActorDto) {
-		const existingActor = await this.db.actor.findUnique({ where: { id } })
+		const existingActor = await this.db.actor.findFirst({ where: { id } })
 
 		if (!existingActor) {
 			throw new NotFoundException(`Актер с идентификатором ${id} не найден.`)
@@ -59,8 +66,36 @@ export class ActorService {
 			// P2000: Общая ошибка базы данных.
 
 			throw new InternalServerErrorException(
-				'Произошла непонятная ошибка в базе данных',
+				'Произошла непонятная ошибка в базе данных, при обновление актера ',
 				error
+			)
+		}
+	}
+
+	async delete(id: number) {
+		try {
+			const deletedActor = await this.db.actor.delete({
+				where: { id: id },
+			})
+			if (!deletedActor) {
+				throw new ConflictException(`Актер с идентификатором ${id} не найден.`)
+			}
+			return deletedActor
+		} catch (error) {
+			this.logger.error(
+				`Произошла ошибка во время удаления актера с идентификатором ${id}`,
+				error.stack,
+				'ActorService.delete'
+			)
+			// if (error instanceof Prisma.PrismaClientKnownRequestError) {
+			// 	if (error.code === 'P2025') {
+			// 		throw new ConflictException(
+			// 			`Актер с идентификатором ${id} не найден.`
+			// 		)
+			// 	}
+			// }
+			throw new ConflictException(
+				`Ошибка при удалении актера: ${error.message}`
 			)
 		}
 	}

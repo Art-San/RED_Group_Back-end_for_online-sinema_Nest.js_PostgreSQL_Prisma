@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Delete,
 	HttpCode,
 	Param,
 	ParseIntPipe,
@@ -10,12 +11,15 @@ import {
 import {
 	ApiBearerAuth,
 	ApiCreatedResponse,
+	ApiOkResponse,
 	ApiResponse,
 	ApiTags,
 } from '@nestjs/swagger'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { ActorService } from './actor.service'
 import { ActorDto } from './dto/actor.dto'
+import { CreateActorDto } from './dto/create-actor.dto'
+import { UpdateActorDto } from './dto/update-actor.dto'
 
 @ApiTags('Actors')
 @Controller('actors')
@@ -25,8 +29,10 @@ export class ActorController {
 	/*Admin place*/
 	@ApiBearerAuth()
 	@Post()
-	@ApiCreatedResponse({ description: 'Создался актер пустой, вернулся ID' })
-	@HttpCode(200)
+	@ApiCreatedResponse({
+		type: CreateActorDto,
+		description: 'Создался актер пустой, вернулся ID',
+	})
 	@Auth('admin')
 	async create() {
 		return this.actorService.create()
@@ -36,11 +42,22 @@ export class ActorController {
 	@Put(':id')
 	@HttpCode(200)
 	@ApiResponse({
-		type: ActorDto,
+		type: UpdateActorDto,
 	})
 	@HttpCode(200)
 	@Auth('admin')
 	async update(@Param('id', ParseIntPipe) id: number, @Body() dto: ActorDto) {
 		return this.actorService.update(id, dto)
+	}
+
+	@ApiBearerAuth()
+	@Delete(':id')
+	@ApiOkResponse({
+		type: ActorDto,
+		description: 'Актер успешно удален',
+	})
+	@Auth('admin')
+	async deleteUser(@Param('id', ParseIntPipe) id: number) {
+		return this.actorService.delete(id)
 	}
 }

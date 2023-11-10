@@ -6,7 +6,10 @@ import { ValidationPipe } from '@nestjs/common'
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule)
 
-	const config = new DocumentBuilder().setTitle('online-sinema').build() // Название нашей документации, здесь много чего, но обойдемся тайтлом. Вызываем .build() что бы подключить config
+	const config = new DocumentBuilder()
+		.setTitle('online-sinema') // Название нашей документации, здесь много чего, но обойдемся тайтлом.
+		.addBearerAuth() // Добавляем поддержку Bearer-токена
+		.build() // Вызываем .build() что бы подключить config
 
 	const document = SwaggerModule.createDocument(app, config)
 
