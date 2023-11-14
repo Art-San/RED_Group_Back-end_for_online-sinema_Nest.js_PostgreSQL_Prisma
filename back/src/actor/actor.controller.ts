@@ -36,6 +36,9 @@ export class ActorController {
 		return this.actorService.bySlug(slug)
 	}
 
+	@ApiResponse({
+		type: ActorDto,
+	})
 	@Get()
 	async getAll(@Query('searchTerm') searchTerm?: string) {
 		return this.actorService.getAll(searchTerm)

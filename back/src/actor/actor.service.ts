@@ -29,7 +29,54 @@ export class ActorService {
 	}
 
 	async getAll(searchTerm?: string) {
-		return null
+		const actors = await this.db.actor.findMany({
+			where: {
+				OR: [
+					{
+						name: {
+							contains: searchTerm || '',
+							mode: 'insensitive',
+						},
+					},
+					{
+						slug: {
+							contains: searchTerm || '',
+							mode: 'insensitive',
+						},
+					},
+				],
+			},
+			select: {
+				id: true,
+				name: true,
+				slug: true,
+				photo: true,
+				createdAt: true,
+			},
+			orderBy: { createdAt: 'desc' },
+		})
+
+		// const actorsWithMoviesCount = await Promise.all(
+		// 	actors.map(async (actor) => {
+		// 		const movies = await this.db.movie.findMany({
+		// 			where: {
+		// 				actors: {
+		// 					some: {
+		// 						id: actor.id,
+		// 					},
+		// 				},
+		// 			},
+		// 		});
+
+		// 		return {
+		// 			...actor,
+		// 			countMovies: movies.length,
+		// 		};
+		// 	})
+		// );
+
+		return actors
+		// return actorsWithMoviesCount;
 	}
 
 	/*Admin place*/
