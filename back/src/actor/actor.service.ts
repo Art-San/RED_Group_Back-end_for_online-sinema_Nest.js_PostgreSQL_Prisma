@@ -28,6 +28,7 @@ export class ActorService {
 		return actor
 	}
 
+	/*TODO: Не работает поиск @Query FIXME: */
 	async getAll(searchTerm?: string) {
 		const actors = await this.db.actor.findMany({
 			where: {
