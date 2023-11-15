@@ -51,15 +51,15 @@ export class UpdateMovieDto {
 	@IsString()
 	videoUrl: string
 
-	@ApiProperty()
-	@IsArray() // Будет массив
-	@IsString({ each: true }) // Каждый элемент массива строка
-	genres: string[]
+	// @ApiProperty()
+	// @IsArray() // Будет массив
+	// @IsString({ each: true }) // Каждый элемент массива строка
+	// genres: string[]
 
-	@ApiProperty()
-	@IsArray()
-	@IsString({ each: true })
-	actors: string[]
+	// @ApiProperty()
+	// @IsArray()
+	// @IsString({ each: true })
+	// actors: string[]
 
 	isSendTelegram?: boolean
 }

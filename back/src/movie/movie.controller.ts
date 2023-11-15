@@ -12,7 +12,11 @@ import {
 } from '@nestjs/common'
 import { MovieService } from './movie.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
-import { ApiOkResponse } from '@nestjs/swagger'
+import {
+	ApiBearerAuth,
+	ApiCreatedResponse,
+	ApiOkResponse,
+} from '@nestjs/swagger'
 import { MovieDto } from './dto/movie.dto'
 import { UpdateMovieDto } from './dto/update.movie.dto'
 
@@ -51,29 +55,41 @@ export class MovieController {
 	// 	return this.movieService.updateCountOpened(slug)
 	// }
 
+	/*Admin place*/
+	// @ApiBearerAuth()
 	// @Get(':id')
 	// @Auth('admin')
 	// async get(@Param('id', ParseIntPipe) id: number) {
 	// 	return this.movieService.byId(id)
 	// }
 
-	// @Post()
-	// @HttpCode(200)
-	// @Auth('admin')
-	// async create() {
-	// 	return this.movieService.create()
-	// }
+	@ApiBearerAuth()
+	@Post()
+	@ApiCreatedResponse({
+		type: Number,
+		description: 'Создался актер пустой, вернулся ID',
+	})
+	@HttpCode(200)
+	@Auth('admin')
+	async create() {
+		return this.movieService.create()
+	}
 
-	// @Put(':id')
-	// @HttpCode(200)
-	// @Auth('admin')
-	// async update(
-	// 	@Param('id', ParseIntPipe) id: number,
-	// 	@Body() dto: UpdateMovieDto
-	// ) {
-	// 	return this.movieService.update(id, dto)
-	// }
+	@ApiBearerAuth()
+	@Put(':id')
+	@ApiCreatedResponse({
+		type: UpdateMovieDto,
+	})
+	@HttpCode(200)
+	@Auth('admin')
+	async update(
+		@Param('id', ParseIntPipe) id: number,
+		@Body() dto: UpdateMovieDto
+	) {
+		return this.movieService.update(id, dto)
+	}
 
+	// @ApiBearerAuth()
 	// @Delete(':id')
 	// @HttpCode(200)
 	// @ApiOkResponse({
