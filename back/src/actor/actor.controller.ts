@@ -36,10 +36,11 @@ export class ActorController {
 		return this.actorService.bySlug(slug)
 	}
 
+	/*TODO: Не работает поиск @Query FIXME: */
+	@Get()
 	@ApiResponse({
 		type: ActorDto,
 	})
-	@Get()
 	async getAll(@Query('searchTerm') searchTerm?: string) {
 		return this.actorService.getAll(searchTerm)
 	}
