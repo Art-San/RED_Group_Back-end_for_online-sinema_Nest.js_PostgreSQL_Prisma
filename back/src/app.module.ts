@@ -9,16 +9,18 @@ import { FilesModule } from './files/files.module'
 import { ActorModule } from './actor/actor.module'
 import { MovieModule } from './movie/movie.module'
 // import { RatingModule } from './rating/rating.module'
+import { ProfileModule } from './profile/profile.module'
 
 @Module({
 	imports: [
 		DbModule,
 		UserModule,
+		ProfileModule,
 		AuthModule,
-		GenreModule,
-		FilesModule,
-		ActorModule,
-		MovieModule,
+		// GenreModule,
+		// FilesModule,
+		// ActorModule,
+		// MovieModule,
 		// RatingModule,
 	],
 	controllers: [AppController],

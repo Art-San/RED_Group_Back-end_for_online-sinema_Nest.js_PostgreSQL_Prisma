@@ -10,11 +10,13 @@ import { hash, verify } from 'argon2'
 import { JwtService } from '@nestjs/jwt'
 import { User } from '@prisma/client'
 import { RefreshTokenDto } from './dto/refreshToken.dto'
+import { ProfileService } from 'src/profile/profile.service'
 
 @Injectable()
 export class AuthService {
 	constructor(
 		private db: DbService,
+		// private profileService: ProfileService,
 		private readonly jwtService: JwtService
 	) {}
 
@@ -43,6 +45,8 @@ export class AuthService {
 				password: await hash(dto.password),
 			},
 		})
+
+		// await this.profileService.create(newUser.id)
 
 		const tokens = await this.issueTokenPair(String(newUser.id))
 		return {
