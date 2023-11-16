@@ -63,6 +63,7 @@ export class MovieService {
 		}
 	}
 
+	// /*FIXME: Пытаюсь разобраться*/
 	async update(id: number, dto: UpdateMovieDto) {
 		try {
 			const updatedMovie = await this.db.movie.update({
